@@ -1,14 +1,14 @@
-# University Portal Web App
+# School Web App
 
 ## Overview
-A role-based React web application for Students, Lecturers, and Admins. Features include authentication, dashboard analytics, appointments, timetable viewing, announcements, and issue reporting.
+A role-based React web application for Students, Lecturers, and Admins. Features include authentication, dashboard analytics, appointments, timetable viewing, notifications, and issue reporting.
 
 ## Features
 - Role-based authentication (Student, Lecturer, Admin)
 - Responsive, mobile-first UI
 - Appointments booking system
 - Timetable viewer (students only)
-- Announcements management (lecturers)
+- Notifications management (lecturers)
 - Issue reporting and tracking
 - Data export (PDF, CSV)
 
@@ -19,7 +19,7 @@ A role-based React web application for Students, Lecturers, and Admins. Features
 ## Project Structure
 - Landing Page → Authentication (Sign In / Sign Up / Confirm) → Main App
 - Sidebar + Top Header (Profile Info, Role, Report Issue)
-- Main Pages: Dashboard, Appointments, Timetable, Announcements, User Profiles, Report Issues
+- Main Pages: Dashboard, Appointments, Timetable, Notifications, User Profiles, Report Issues
 
 ## Setup
 1. Clone the repository:
@@ -37,5 +37,4 @@ A role-based React web application for Students, Lecturers, and Admins. Features
 
 ## Notes
 - Frontend only. Backend endpoints assumed.
-- All styles should be centralized for consistency.
 - Role-based navigation and access control are required.
