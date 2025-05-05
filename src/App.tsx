@@ -7,6 +7,8 @@ import LandingPage from "./pages/LandingPage";
 import SignInPage from "./pages/auth/SignInPage";
 import SignUpPage from "./pages/auth/SignUpPage";
 import VerifyPage from "./pages/auth/VerifyPage";
+import ForgotPasswordPage from "./pages/auth/ForgotPasswordPage";
+import ResetPasswordPage from "./pages/auth/ResetPasswordPage";
 import DashboardPage from "./pages/dashboard/DashboardPage";
 import NotificationsPage from "./pages/notifications/NotificationsPage";
 import AuthLayout from "./layouts/AuthLayout";
@@ -17,6 +19,7 @@ import TimetablePage from "./pages/timetable/TimetablePage";
 import AppointmentsPage from "./pages/appointments/AppointmentsPage";
 import IssuesPage from "./pages/issues/IssuesPage";
 import ProfilePage from "./pages/profile/ProfilePage";
+
 
 const queryClient = new QueryClient();
 
@@ -35,6 +38,8 @@ const App = () => (
             <Route path="signin" element={<SignInPage />} />
             <Route path="signup" element={<SignUpPage />} />
             <Route path="verify" element={<VerifyPage />} />
+            <Route path="forgot-password" element={<ForgotPasswordPage />} />
+            <Route path="reset-password" element={<ResetPasswordPage />} />
           </Route>
           
           {/* Main App Routes */}

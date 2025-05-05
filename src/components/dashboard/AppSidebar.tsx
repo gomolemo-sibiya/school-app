@@ -64,14 +64,14 @@ const AppSidebar = ({ role }: AppSidebarProps) => {
           icon: Bell,
         },
         {
-          title: 'User Profile',
-          path: '/app/profile',
-          icon: User,
-        },
-        {
           title: 'Report Issues',
           path: '/app/issues',
           icon: FileText,
+        },
+        {
+          title: 'User Profile',
+          path: '/app/profile',
+          icon: User,
         },
       ];
 

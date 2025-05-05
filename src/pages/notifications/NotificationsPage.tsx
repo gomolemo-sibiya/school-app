@@ -1,111 +1,140 @@
-import React, { useEffect, useState, useMemo } from 'react';
-import { format } from 'date-fns';
-import { 
-  Check, 
-  Trash, 
-  Edit, 
-  Plus, 
+import React, { useEffect, useState, useMemo } from "react";
+import { format } from "date-fns";
+import {
+  Check,
+  Trash,
+  Edit,
+  Plus,
   BellRing,
   AlertCircle,
-  Calendar
-} from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import { 
-  Dialog, 
-  DialogContent, 
-  DialogHeader, 
-  DialogTitle, 
-  DialogTrigger, 
+  Calendar,
+} from "lucide-react";
+import { Button } from "@/components/ui/button";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
   DialogClose,
-  DialogDescription 
-} from '@/components/ui/dialog';
-import { useNotifications } from '@/contexts/NotificationContext';
-import { 
-  createNotification, 
-  updateNotification, 
-  deleteNotification 
-} from '@/services/notificationService';
-import { Notification, NotificationType } from '@/types/notifications';
-import NotificationForm from '@/components/notifications/NotificationForm';
-import { Badge } from '@/components/ui/badge';
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
-import { toast } from '@/components/ui/sonner';
+  DialogDescription,
+} from "@/components/ui/dialog";
+import { useNotifications } from "@/contexts/NotificationContext";
+import {
+  createNotification,
+  updateNotification,
+  deleteNotification,
+} from "@/services/notificationService";
+import { Notification, NotificationType } from "@/types/notifications";
+import NotificationForm from "@/components/notifications/NotificationForm";
+import { Badge } from "@/components/ui/badge";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { toast } from "@/components/ui/sonner";
 
 const NotificationsPage = () => {
-  const { notifications, loading, unreadCount, markAsRead, markAllAsRead, refetchNotifications } = useNotifications();
-  const [selectedNotification, setSelectedNotification] = useState<Notification | null>(null);
+  const {
+    notifications,
+    loading,
+    unreadCount,
+    markAsRead,
+    markAllAsRead,
+    refetchNotifications,
+  } = useNotifications();
+  const [selectedNotification, setSelectedNotification] =
+    useState<Notification | null>(null);
   const [isEditing, setIsEditing] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
   const [user, setUser] = useState<any>(null);
+  const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
 
   useEffect(() => {
-    const storedUser = localStorage.getItem('user');
+    const storedUser = localStorage.getItem("user");
     if (storedUser) {
       setUser(JSON.parse(storedUser));
     }
   }, []);
 
-  const handleCreateNotification = (notification: Omit<Notification, 'id' | 'createdAt' | 'createdBy' | 'status'>) => {
+  const handleCreateNotification = async (
+    notification: Omit<Notification, "id" | "createdAt" | "createdBy" | "status">
+  ): Promise<boolean> => {
     try {
-      createNotification({
+      await createNotification({
         ...notification,
-        createdBy: user?.name || 'Unknown',
-        status: 'unread'
+        createdBy: user?.name || "Unknown",
+        status: "unread",
       });
-      toast.success('Notification created successfully');
+      toast.success("Notification created successfully");
       refetchNotifications();
+      return true;
     } catch (error) {
-      console.error('Error creating notification:', error);
-      toast.error('Failed to create notification');
+      console.error("Error creating notification:", error);
+      toast.error("Failed to create notification");
+      return false;
     }
   };
 
-  const handleUpdateNotification = (id: string, updates: Partial<Notification>) => {
+  const handleUpdateNotification = async (
+    id: string,
+    updates: Partial<Notification>
+  ): Promise<boolean> => {
     try {
-      updateNotification(id, updates);
-      toast.success('Notification updated successfully');
+      await updateNotification(id, updates);
+      toast.success("Notification updated successfully");
       refetchNotifications();
-      setIsEditing(false);
+      return true;
     } catch (error) {
-      console.error('Error updating notification:', error);
-      toast.error('Failed to update notification');
+      console.error("Error updating notification:", error);
+      toast.error("Failed to update notification");
+      return false;
     }
   };
 
   const handleDeleteNotification = (id: string) => {
     try {
       deleteNotification(id);
-      toast.success('Notification deleted successfully');
+      toast.success("Notification deleted successfully");
       refetchNotifications();
       setIsDeleting(false);
     } catch (error) {
-      console.error('Error deleting notification:', error);
-      toast.error('Failed to delete notification');
+      console.error("Error deleting notification:", error);
+      toast.error("Failed to delete notification");
     }
   };
 
   const handleReadNotification = (notification: Notification) => {
-    if (notification.status === 'unread') {
+    if (notification.status === "unread") {
       markAsRead(notification.id);
     }
     setSelectedNotification(notification);
   };
 
-  const getNotificationIcon = useMemo(() => (type: NotificationType) => {
-    switch (type) {
-      case 'announcement':
-        return <BellRing className="h-5 w-5 text-blue-500" />;
-      case 'appointment':
-        return <Calendar className="h-5 w-5 text-green-500" />;
-      case 'issue':
-        return <AlertCircle className="h-5 w-5 text-orange-500" />;
-      default:
-        return <BellRing className="h-5 w-5" />;
-    }
-  }, []);
+  const getNotificationIcon = useMemo(
+    () => (type: NotificationType) => {
+      switch (type) {
+        case "announcement":
+          return <BellRing className="h-5 w-5 text-blue-500" />;
+        case "appointment":
+          return <Calendar className="h-5 w-5 text-green-500" />;
+        case "issue":
+          return <AlertCircle className="h-5 w-5 text-orange-500" />;
+        default:
+          return <BellRing className="h-5 w-5" />;
+      }
+    },
+    []
+  );
 
   if (loading) {
-    return <div className="p-6 flex justify-center">Loading notifications...</div>;
+    return (
+      <div className="p-6 flex justify-center">Loading notifications...</div>
+    );
   }
 
   return (
@@ -119,11 +148,13 @@ const NotificationsPage = () => {
               Mark all as read
             </Button>
           )}
-          
-          {(user?.role === 'lecturer' || user?.role === 'admin') && (
-            <Dialog>
+          {(user?.role === "lecturer" || user?.role === "admin") && (
+            <Dialog
+              open={isCreateDialogOpen}
+              onOpenChange={setIsCreateDialogOpen}
+            >
               <DialogTrigger asChild>
-                <Button>
+                <Button onClick={() => setIsCreateDialogOpen(true)}>
                   <Plus className="mr-2 h-4 w-4" />
                   Create Notification
                 </Button>
@@ -131,11 +162,10 @@ const NotificationsPage = () => {
               <DialogContent className="sm:max-w-[525px]">
                 <DialogHeader>
                   <DialogTitle>Create New Notification</DialogTitle>
-                  <DialogDescription>Fill out the form to create a new notification</DialogDescription>
                 </DialogHeader>
-                <NotificationForm 
+                <NotificationForm
                   onSubmit={handleCreateNotification}
-                  onCancel={() => {}}
+                  onCancel={() => setIsCreateDialogOpen(false)}
                 />
               </DialogContent>
             </Dialog>
@@ -152,12 +182,18 @@ const NotificationsPage = () => {
             </div>
           ) : (
             <div className="space-y-3">
-              {notifications.map(notification => (
+              {notifications.map((notification) => (
                 <div
                   key={notification.id}
                   className={`p-3 border rounded-md cursor-pointer transition-all hover:bg-accent hover:text-accent-foreground ${
-                    selectedNotification?.id === notification.id ? 'bg-accent text-accent-foreground' : ''
-                  } ${notification.status === 'unread' ? 'border-l-4 border-l-primary' : ''}`}
+                    selectedNotification?.id === notification.id
+                      ? "bg-accent text-accent-foreground"
+                      : ""
+                  } ${
+                    notification.status === "unread"
+                      ? "border-l-4 border-l-primary"
+                      : ""
+                  }`}
                   onClick={() => handleReadNotification(notification)}
                 >
                   <div className="flex items-center gap-3">
@@ -165,10 +201,13 @@ const NotificationsPage = () => {
                     <div className="flex-1">
                       <h5 className="font-medium">{notification.title}</h5>
                       <p className="text-sm text-muted-foreground truncate">
-                        {format(new Date(notification.createdAt), 'MMM dd, yyyy')}
+                        {format(
+                          new Date(notification.createdAt),
+                          "MMM dd, yyyy"
+                        )}
                       </p>
                     </div>
-                    {notification.status === 'unread' && (
+                    {notification.status === "unread" && (
                       <div className="h-2 w-2 rounded-full bg-primary"></div>
                     )}
                   </div>
@@ -186,18 +225,29 @@ const NotificationsPage = () => {
                   <div>
                     <CardTitle>{selectedNotification.title}</CardTitle>
                     <CardDescription>
-                      {format(new Date(selectedNotification.createdAt), 'MMMM dd, yyyy h:mm a')}
+                      {format(
+                        new Date(selectedNotification.createdAt),
+                        "MMMM dd, yyyy h:mm a"
+                      )}
                     </CardDescription>
                   </div>
-                  <Badge variant={selectedNotification.status === 'read' ? 'outline' : 'default'}>
-                    {selectedNotification.status === 'read' ? 'Read' : 'Unread'}
+                  <Badge
+                    variant={
+                      selectedNotification.status === "read"
+                        ? "outline"
+                        : "default"
+                    }
+                  >
+                    {selectedNotification.status === "read" ? "Read" : "Unread"}
                   </Badge>
                 </div>
               </CardHeader>
               <CardContent>
-                <p className="whitespace-pre-wrap">{selectedNotification.content}</p>
+                <p className="whitespace-pre-wrap">
+                  {selectedNotification.content}
+                </p>
               </CardContent>
-              {(user?.role === 'lecturer' || user?.role === 'admin') && (
+              {(user?.role === "lecturer" || user?.role === "admin") && (
                 <CardFooter className="flex justify-end gap-2">
                   <Dialog open={isEditing} onOpenChange={setIsEditing}>
                     <DialogTrigger asChild>
@@ -209,13 +259,16 @@ const NotificationsPage = () => {
                     <DialogContent>
                       <DialogHeader>
                         <DialogTitle>Edit Notification</DialogTitle>
-                        <DialogDescription>Make changes to the notification</DialogDescription>
                       </DialogHeader>
-                      <NotificationForm 
-                        notification={selectedNotification}
-                        onSubmit={(data) => handleUpdateNotification(selectedNotification.id, data)}
-                        onCancel={() => setIsEditing(false)}
-                      />
+                      {selectedNotification && (
+                        <NotificationForm
+                          notification={selectedNotification}
+                          onSubmit={async (data) => {
+                            return handleUpdateNotification(selectedNotification.id, data);
+                          }}
+                          onCancel={() => setIsEditing(false)}
+                        />
+                      )}
                     </DialogContent>
                   </Dialog>
 
@@ -229,18 +282,24 @@ const NotificationsPage = () => {
                     <DialogContent>
                       <DialogHeader>
                         <DialogTitle>Delete Notification</DialogTitle>
-                        <DialogDescription>Are you sure you want to delete this notification?</DialogDescription>
+                        <DialogDescription>
+                          Are you sure you want to delete this notification?
+                        </DialogDescription>
                       </DialogHeader>
                       <div className="py-4">
-                        <p className="font-medium mt-2">{selectedNotification.title}</p>
+                        <p className="font-medium mt-2">
+                          {selectedNotification.title}
+                        </p>
                       </div>
                       <div className="flex justify-end gap-3">
                         <DialogClose asChild>
                           <Button variant="outline">Cancel</Button>
                         </DialogClose>
-                        <Button 
-                          variant="destructive" 
-                          onClick={() => handleDeleteNotification(selectedNotification.id)}
+                        <Button
+                          variant="destructive"
+                          onClick={() =>
+                            handleDeleteNotification(selectedNotification.id)
+                          }
                         >
                           Delete
                         </Button>
@@ -254,7 +313,9 @@ const NotificationsPage = () => {
             <div className="h-full flex items-center justify-center bg-card border rounded-lg p-8 text-center">
               <div>
                 <BellRing className="h-12 w-12 mx-auto text-muted-foreground opacity-20 mb-3" />
-                <h3 className="font-medium text-lg">No notification selected</h3>
+                <h3 className="font-medium text-lg">
+                  No notification selected
+                </h3>
                 <p className="text-muted-foreground">
                   Select a notification from the list to view details
                 </p>

@@ -1,62 +1,98 @@
+import React from "react";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import * as z from "zod";
 
-import React from 'react';
-import { useForm } from 'react-hook-form';
-import { zodResolver } from '@hookform/resolvers/zod';
-import * as z from 'zod';
-
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
-import { Input } from '@/components/ui/input';
-import { Button } from '@/components/ui/button';
-import { Textarea } from '@/components/ui/textarea';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { DialogClose } from '@/components/ui/dialog';
-import { getAvailableLecturers } from '@/services/appointmentService';
-import { Appointment } from '@/types/appointments';
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form";
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
+import { Textarea } from "@/components/ui/textarea";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { DialogClose } from "@/components/ui/dialog";
+import { getAvailableLecturers } from "@/services/appointmentService";
+import { Appointment } from "@/types/appointments";
 
 // Form validation schema
-const formSchema = z.object({
-  lecturerId: z.string().min(1, { message: 'Please select a lecturer' }),
-  title: z.string().min(3, { message: 'Title must be at least 3 characters' }),
-  description: z.string().min(10, { message: 'Description must be at least 10 characters' }),
-  date: z.string().min(1, { message: 'Please select a date' }),
-  startTime: z.string().min(1, { message: 'Please select a start time' }),
-  endTime: z.string().min(1, { message: 'Please select an end time' })
-}).refine(data => {
-  // Check if end time is after start time
-  return data.startTime < data.endTime;
-}, {
-  message: "End time must be after start time",
-  path: ["endTime"]
-});
+const formSchema = z
+  .object({
+    lecturerId: z.string().min(1, { message: "Please select a lecturer" }),
+    title: z
+      .string()
+      .min(3, { message: "Title must be at least 3 characters" }),
+    description: z
+      .string()
+      .min(10, { message: "Description must be at least 10 characters" }),
+    date: z.string().min(1, { message: "Please select a date" }),
+    startTime: z.string().min(1, { message: "Please select a start time" }),
+    endTime: z.string().min(1, { message: "Please select an end time" }),
+  })
+  .refine(
+    (data) => {
+      // Check if end time is after start time
+      return data.startTime < data.endTime;
+    },
+    {
+      message: "End time must be after start time",
+      path: ["endTime"],
+    }
+  );
 
 interface AppointmentFormProps {
   appointment?: Appointment;
-  onSubmit: (data: Omit<Appointment, 'id' | 'status' | 'createdAt' | 'studentId' | 'studentName'>) => void;
+  onSubmit: (
+    data: Omit<
+      Appointment,
+      | "id"
+      | "status"
+      | "createdAt"
+      | "studentId"
+      | "studentName"
+      | "lecturerName"
+    >
+  ) => void;
   onCancel: () => void;
   user: any;
 }
 
-const AppointmentForm: React.FC<AppointmentFormProps> = ({ appointment, onSubmit, onCancel, user }) => {
+const AppointmentForm: React.FC<AppointmentFormProps> = ({
+  appointment,
+  onSubmit,
+  onCancel,
+  user,
+}) => {
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      lecturerId: appointment?.lecturerId || '',
-      title: appointment?.title || '',
-      description: appointment?.description || '',
-      date: appointment?.date || '',
-      startTime: appointment?.startTime || '',
-      endTime: appointment?.endTime || '',
-    }
+      lecturerId: appointment?.lecturerId || "",
+      title: appointment?.title || "",
+      description: appointment?.description || "",
+      date: appointment?.date || "",
+      startTime: appointment?.startTime || "",
+      endTime: appointment?.endTime || "",
+    },
   });
 
   const handleSubmit = (values: z.infer<typeof formSchema>) => {
-    const selectedLecturer = lecturers.find(l => l.id === values.lecturerId);
-    
+    const selectedLecturer = lecturers.find((l) => l.id === values.lecturerId);
+
     if (!selectedLecturer) {
-      form.setError('lecturerId', { message: 'Invalid lecturer selected' });
+      form.setError("lecturerId", { message: "Invalid lecturer selected" });
       return;
     }
-    
+
     const appointmentData = {
       lecturerId: values.lecturerId,
       title: values.title,
@@ -68,7 +104,7 @@ const AppointmentForm: React.FC<AppointmentFormProps> = ({ appointment, onSubmit
       studentName: user.name,
       lecturerName: selectedLecturer.name,
     };
-    
+
     onSubmit(appointmentData);
   };
 
@@ -84,10 +120,7 @@ const AppointmentForm: React.FC<AppointmentFormProps> = ({ appointment, onSubmit
           render={({ field }) => (
             <FormItem>
               <FormLabel>Lecturer</FormLabel>
-              <Select 
-                onValueChange={field.onChange} 
-                defaultValue={field.value}
-              >
+              <Select onValueChange={field.onChange} defaultValue={field.value}>
                 <FormControl>
                   <SelectTrigger>
                     <SelectValue placeholder="Select a lecturer" />
@@ -127,10 +160,10 @@ const AppointmentForm: React.FC<AppointmentFormProps> = ({ appointment, onSubmit
             <FormItem>
               <FormLabel>Description</FormLabel>
               <FormControl>
-                <Textarea 
-                  {...field} 
+                <Textarea
+                  {...field}
                   placeholder="Describe the purpose of the meeting"
-                  rows={3} 
+                  rows={3}
                 />
               </FormControl>
               <FormMessage />
@@ -145,7 +178,11 @@ const AppointmentForm: React.FC<AppointmentFormProps> = ({ appointment, onSubmit
             <FormItem>
               <FormLabel>Date</FormLabel>
               <FormControl>
-                <Input {...field} type="date" min={new Date().toISOString().split('T')[0]} />
+                <Input
+                  {...field}
+                  type="date"
+                  min={new Date().toISOString().split("T")[0]}
+                />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -189,7 +226,7 @@ const AppointmentForm: React.FC<AppointmentFormProps> = ({ appointment, onSubmit
             </Button>
           </DialogClose>
           <Button type="submit">
-            {appointment ? 'Update' : 'Create'} Appointment
+            {appointment ? "Update" : "Create"} Appointment
           </Button>
         </div>
       </form>
